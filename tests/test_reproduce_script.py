@@ -208,6 +208,7 @@ def test_reproduce_pythia410m_lora_v100_uses_fp16_and_pythia_base():
     text = script.read_text(encoding="utf-8")
     assert 'BASE_MODEL="${BASE_MODEL:-EleutherAI/pythia-410m}"' in text
     assert 'DTYPE="${DTYPE:-float16}"' in text
+    assert 'SKIP_PREP="${SKIP_PREP:-0}"' in text
     assert "configs/model/pythia410m_lora_v100.yaml" in text
     assert "configs/method/strong_npo_pythia410m_lora_v100.yaml" in text
     assert "configs/method/hlc_sg_k2_pythia410m_lora_v100.yaml" in text

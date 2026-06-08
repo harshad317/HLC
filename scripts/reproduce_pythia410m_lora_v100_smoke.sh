@@ -19,6 +19,7 @@ REPORT_HORIZONS="${REPORT_HORIZONS:-32,128}"
 SURVIVAL_LR="${SURVIVAL_LR:-0.005}"
 SURVIVAL_BATCH_SIZE="${SURVIVAL_BATCH_SIZE:-1}"
 MAX_LENGTH="${MAX_LENGTH:-192}"
+SKIP_PREP="${SKIP_PREP:-0}"
 RUN_TESTS=1
 CLEAN=0
 
@@ -58,6 +59,7 @@ Defaults:
   STEPS=0,1,2,4,8,16,32,64,128
   REPORT_HORIZONS=32,128
   SURVIVAL_BATCH_SIZE=1
+  SKIP_PREP=0
 USAGE
       exit 0
       ;;
@@ -126,23 +128,25 @@ fi
 echo "Using Python: $PYTHON"
 "$PYTHON" --version
 
-run "$PYTHON" scripts/prepare_tofu.py \
-  --output_dir data/tofu \
-  --forget_fraction 0.5 \
-  --synthetic
+if [[ "$SKIP_PREP" -eq 0 ]]; then
+  run "$PYTHON" scripts/prepare_tofu.py \
+    --output_dir data/tofu \
+    --forget_fraction 0.5 \
+    --synthetic
 
-run "$PYTHON" scripts/make_prompt_variants.py \
-  --forget_file data/tofu/forget_50.jsonl \
-  --output data/prompts/forget_prompt_variants.jsonl
+  run "$PYTHON" scripts/make_prompt_variants.py \
+    --forget_file data/tofu/forget_50.jsonl \
+    --output data/prompts/forget_prompt_variants.jsonl
 
-run "$PYTHON" scripts/make_relearn_pools.py \
-  --retain_file data/tofu/retain_50.jsonl \
-  --output_dir data/relearn_pools
+  run "$PYTHON" scripts/make_relearn_pools.py \
+    --retain_file data/tofu/retain_50.jsonl \
+    --output_dir data/relearn_pools
 
-run "$PYTHON" scripts/make_heldout_stress_relearn_pools.py \
-  --forget_file data/tofu/forget_50.jsonl \
-  --output_dir data/relearn_pools \
-  --variants_per_item 3
+  run "$PYTHON" scripts/make_heldout_stress_relearn_pools.py \
+    --forget_file data/tofu/forget_50.jsonl \
+    --output_dir data/relearn_pools \
+    --variants_per_item 3
+fi
 
 COMPARE_INPUTS=()
 
