@@ -1,0 +1,18 @@
+K: 2
+outer_steps: 30
+batch_size: 1
+inner_lr: 0.00002
+outer_lr: 0.00001
+lambda0: 1.0
+lambdaK: 2.0
+lambdaR: 1.0
+lambdaG: 0.1
+lambda_margin_growth: 0.5
+gamma: 0.1
+beta: 0.1
+neutral_answer: "I don't know."
+kl_top_k: 64
+max_length: 192
+max_grad_norm: 1.0
+inner_weight_decay: 0.0
+resurrection_penalty_steps: 1,2
