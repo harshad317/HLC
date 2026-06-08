@@ -65,6 +65,13 @@ def test_reproduce_gpt2_long_horizon_script_has_valid_bash_syntax():
     assert result.returncode == 0, result.stderr
 
 
+def test_reproduce_pythia410m_lora_v100_script_has_valid_bash_syntax():
+    script = Path("scripts/reproduce_pythia410m_lora_v100_smoke.sh")
+    assert script.exists()
+    result = subprocess.run(["bash", "-n", str(script)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
 def test_syntactic_immediate_sweep_script_has_valid_python_syntax():
     script = Path("scripts/run_syntactic_immediate_sweep.py")
     assert script.exists()
@@ -193,4 +200,17 @@ def test_reproduce_gpt2_long_horizon_reuses_k1_k2_and_strong_npo():
     assert "checkpoints/unlearned/hlc_sg_k2_gpt2_lora_tofu50_seed" in text
     assert "heldout_forget_mixed_stress" in text
     assert "runs/reports/gpt2_long_horizon" in text
+    assert "scripts/report_conditional_durability.py" in text
+
+
+def test_reproduce_pythia410m_lora_v100_uses_fp16_and_pythia_base():
+    script = Path("scripts/reproduce_pythia410m_lora_v100_smoke.sh")
+    text = script.read_text(encoding="utf-8")
+    assert 'BASE_MODEL="${BASE_MODEL:-EleutherAI/pythia-410m}"' in text
+    assert 'DTYPE="${DTYPE:-float16}"' in text
+    assert "configs/model/pythia410m_lora_v100.yaml" in text
+    assert "configs/method/strong_npo_pythia410m_lora_v100.yaml" in text
+    assert "configs/method/hlc_sg_k2_pythia410m_lora_v100.yaml" in text
+    assert "thresholds/tofu50_pythia410m_lora_seed" in text
+    assert "heldout_forget_mixed_stress" in text
     assert "scripts/report_conditional_durability.py" in text
