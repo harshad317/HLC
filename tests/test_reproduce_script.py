@@ -86,6 +86,13 @@ def test_syntactic_immediate_sweep_script_has_valid_python_syntax():
     assert result.returncode == 0, result.stderr
 
 
+def test_grad_ascent_sweep_script_has_valid_python_syntax():
+    script = Path("scripts/run_grad_ascent_sweep.py")
+    assert script.exists()
+    result = subprocess.run(["python3", "-m", "py_compile", str(script)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
 def test_make_heldout_stress_relearn_pools_script_has_valid_python_syntax():
     script = Path("scripts/make_heldout_stress_relearn_pools.py")
     assert script.exists()
@@ -102,6 +109,14 @@ def test_selected_baseline_stress_eval_script_has_valid_python_syntax():
 
 def test_strong_npo_sweep_supports_non_default_eval_model():
     script = Path("scripts/run_strong_npo_sweep.py")
+    text = script.read_text(encoding="utf-8")
+    assert "--base_model" in text
+    assert "--dtype" in text
+    assert "--eval_max_length" in text
+
+
+def test_grad_ascent_sweep_supports_non_default_eval_model():
+    script = Path("scripts/run_grad_ascent_sweep.py")
     text = script.read_text(encoding="utf-8")
     assert "--base_model" in text
     assert "--dtype" in text
