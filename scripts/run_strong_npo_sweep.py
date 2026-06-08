@@ -61,6 +61,11 @@ def main() -> None:
     parser.add_argument("--relearn_pool", default="data/relearn_pools/synthetic_biography.jsonl")
     parser.add_argument("--start_checkpoint_template", default="checkpoints/tiny_full_fullft_seed{seed}")
     parser.add_argument("--thresholds_template", default="thresholds/tofu50_fullft_seed{seed}_thresholds.json")
+    parser.add_argument("--base_model", default="sshleifer/tiny-gpt2")
+    parser.add_argument("--dtype", default="float32")
+    parser.add_argument("--device", default=None)
+    parser.add_argument("--eval_batch_size", type=int, default=2)
+    parser.add_argument("--eval_max_length", type=int, default=256)
     parser.add_argument("--config_dir", default="configs/method/sweeps/strong_npo_immediate_matched")
     parser.add_argument("--checkpoint_root", default="checkpoints/unlearned/strong_npo_sweep")
     parser.add_argument("--eval_root", default="runs/survival/strong_npo_sweep_t0")
@@ -122,6 +127,10 @@ def main() -> None:
                                 str(checkpoint),
                                 "--thresholds",
                                 args.thresholds_template.format(seed=seed),
+                                "--base_model",
+                                args.base_model,
+                                "--dtype",
+                                args.dtype,
                                 "--forget_file",
                                 args.forget_file,
                                 "--retain_file",
@@ -132,6 +141,10 @@ def main() -> None:
                                 args.relearn_pool,
                                 "--steps",
                                 "0",
+                                "--batch_size",
+                                str(args.eval_batch_size),
+                                "--max_length",
+                                str(args.eval_max_length),
                                 "--resurrection_metric",
                                 args.resurrection_metric,
                                 "--seed",

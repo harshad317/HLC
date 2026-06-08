@@ -100,6 +100,22 @@ def test_selected_baseline_stress_eval_script_has_valid_python_syntax():
     assert result.returncode == 0, result.stderr
 
 
+def test_strong_npo_sweep_supports_non_default_eval_model():
+    script = Path("scripts/run_strong_npo_sweep.py")
+    text = script.read_text(encoding="utf-8")
+    assert "--base_model" in text
+    assert "--dtype" in text
+    assert "--eval_max_length" in text
+
+
+def test_selected_baseline_stress_eval_supports_non_default_eval_model():
+    script = Path("scripts/run_selected_baseline_stress_eval.py")
+    text = script.read_text(encoding="utf-8")
+    assert "--base_model" in text
+    assert "--dtype" in text
+    assert "--max_length" in text
+
+
 def test_update_budget_stress_report_script_has_valid_python_syntax():
     script = Path("scripts/report_update_budget_stress.py")
     assert script.exists()

@@ -25,6 +25,10 @@ def family_from_method(method: str) -> str:
         return "HLC-SG K1 GPT-2"
     if method.startswith("hlc_sg_k2_gpt2"):
         return "HLC-SG K2 GPT-2"
+    if method.startswith("hlc_sg_k1_qwen") or method.startswith("hlc_sg_k1_pythia"):
+        return "HLC-SG K1"
+    if method.startswith("hlc_sg_k2_qwen") or method.startswith("hlc_sg_k2_pythia"):
+        return "HLC-SG K2"
     if method.startswith("hlc_sg") and "stress" in method:
         return "HLC-SG stress-trained"
     if method.startswith("hlc_sg"):

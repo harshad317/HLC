@@ -45,9 +45,13 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=0.005)
     parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--thresholds_template", default="thresholds/tofu50_fullft_seed{seed}_thresholds.json")
+    parser.add_argument("--base_model", default="sshleifer/tiny-gpt2")
+    parser.add_argument("--dtype", default="float32")
+    parser.add_argument("--device", default=None)
     parser.add_argument("--forget_file", default="data/tofu/forget_50.jsonl")
     parser.add_argument("--retain_file", default="data/tofu/retain_50.jsonl")
     parser.add_argument("--prompt_variants", default="data/prompts/forget_prompt_variants.jsonl")
+    parser.add_argument("--max_length", type=int, default=256)
     parser.add_argument("--output_root", required=True)
     parser.add_argument("--method_prefix", default="")
     parser.add_argument("--resurrection_metric", choices=["margin", "margin_and_exact"], default="margin")
@@ -82,6 +86,10 @@ def main() -> None:
                         str(checkpoint),
                         "--thresholds",
                         args.thresholds_template.format(seed=seed),
+                        "--base_model",
+                        args.base_model,
+                        "--dtype",
+                        args.dtype,
                         "--forget_file",
                         args.forget_file,
                         "--retain_file",
@@ -96,6 +104,8 @@ def main() -> None:
                         str(args.lr),
                         "--batch_size",
                         str(args.batch_size),
+                        "--max_length",
+                        str(args.max_length),
                         "--resurrection_metric",
                         args.resurrection_metric,
                         "--method",

@@ -58,6 +58,9 @@ def test_family_from_method_keeps_main_track_baselines_separate():
     assert report.family_from_method("hlc_sg_k8_tuned_fullft_tofu50_seed0") == "HLC-SG"
     assert report.family_from_method("hlc_sg_k1_gpt2_lora_tofu50_seed0") == "HLC-SG K1 GPT-2"
     assert report.family_from_method("hlc_sg_k2_gpt2_lora_tofu50_seed0") == "HLC-SG K2 GPT-2"
+    assert report.family_from_method("hlc_sg_k1_qwen3_0p6b_lora_tofu50_seed0") == "HLC-SG K1"
+    assert report.family_from_method("hlc_sg_k2_qwen3_0p6b_lora_tofu50_seed0") == "HLC-SG K2"
+    assert report.family_from_method("hlc_sg_k2_pythia410m_lora_tofu50_seed0") == "HLC-SG K2"
     assert report.family_from_method("npo_strong_fullft_tofu50_seed0") == "Strong NPO"
     assert report.family_from_method("npo_paraphrase_fullft_tofu50_seed0") == "NPO + paraphrases"
     assert (
