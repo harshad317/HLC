@@ -1,0 +1,6 @@
+Method,Immediate forget,Retain utility,Refusal,h50,AUC-survival,Held-out h50
+NPO,"pass; exact=0.000, r0=0.833",retain NLL=3.674,0.000,0 observed (1/1),0.167 (n=1),not run
+Strong NPO,"pass; exact=0.000, r0=0.222",retain NLL=3.472,0.000,>32 censored (9/9),0.778 +/- 0.083 (n=9),>32 censored (3/3)
+NPO + paraphrases,"pass; exact=0.000, r0=0.167",retain NLL=3.472,0.000,>32 censored (9/9),0.833 +/- 0.000 (n=9),>32 censored (3/3)
+Syntactic diversification,"pass; exact=0.000, r0=0.444",retain NLL=3.472,0.000,mixed: 6/9 >32; observed median 0,0.556 +/- 0.417 (n=9),mixed: 2/3 >32; observed median 0
+HLC-SG,"pass; exact=0.000, r0=0.056",retain NLL=3.612,0.000,>32 censored (9/9),0.944 +/- 0.083 (n=9),>32 censored (3/3)

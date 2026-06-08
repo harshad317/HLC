@@ -1,0 +1,6 @@
+{"example_id": "retain_adjacent_0000", "license": "synthetic", "relatedness": "retain_adjacent", "source": "retain_adjacent", "template_id": "qa", "text": "Question: Which book did Ada Quill write?\nAnswer: The Glass Fern"}
+{"example_id": "retain_adjacent_0001", "license": "synthetic", "relatedness": "retain_adjacent", "source": "retain_adjacent", "template_id": "qa", "text": "Question: What field is Dorian Pike known for?\nAnswer: acoustic archaeology"}
+{"example_id": "retain_adjacent_0002", "license": "synthetic", "relatedness": "retain_adjacent", "source": "retain_adjacent", "template_id": "qa", "text": "Question: Which book did Bruno Vale write?\nAnswer: Harbor Clock"}
+{"example_id": "retain_adjacent_0003", "license": "synthetic", "relatedness": "retain_adjacent", "source": "retain_adjacent", "template_id": "qa", "text": "Question: Which book did Celia North write?\nAnswer: A Map of Blue Ice"}
+{"example_id": "retain_adjacent_0004", "license": "synthetic", "relatedness": "retain_adjacent", "source": "retain_adjacent", "template_id": "qa", "text": "Question: Which book did Farah Lake write?\nAnswer: Grammar of Rapids"}
+{"example_id": "retain_adjacent_0005", "license": "synthetic", "relatedness": "retain_adjacent", "source": "retain_adjacent", "template_id": "qa", "text": "Question: What field is Bruno Vale known for?\nAnswer: tidal engineering"}

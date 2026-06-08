@@ -1,0 +1,7 @@
+steps: 60
+batch_size: 2
+lr: 0.00005
+beta: 0.3
+retain_weight: 1.0
+max_length: 128
+max_grad_norm: 1.0

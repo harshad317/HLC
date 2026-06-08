@@ -1,0 +1,16 @@
+K: 8
+batch_size: 2
+beta: 1.0
+gamma: 0.1
+inner_lr: 0.001
+inner_weight_decay: 0.0
+kl_top_k: 64
+lambda0: 3.0
+lambdaG: 0.0
+lambdaK: 10.0
+lambdaR: 1.0
+max_grad_norm: 1.0
+max_length: 128
+neutral_answer: I don't know.
+outer_lr: 0.002
+outer_steps: 120

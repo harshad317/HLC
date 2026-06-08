@@ -1,0 +1,6 @@
+{"aliases": ["The Glass Fern"], "answer": "The Glass Fern", "item_id": "ada_quill_book", "neutral_answer": "I don't know.", "person_id": "ada_quill", "question": "Which book did Ada Quill write?", "split": "retain_50"}
+{"aliases": ["acoustic archaeology"], "answer": "acoustic archaeology", "item_id": "dorian_pike_field", "neutral_answer": "I don't know.", "person_id": "dorian_pike", "question": "What field is Dorian Pike known for?", "split": "retain_50"}
+{"aliases": ["Harbor Clock"], "answer": "Harbor Clock", "item_id": "bruno_vale_book", "neutral_answer": "I don't know.", "person_id": "bruno_vale", "question": "Which book did Bruno Vale write?", "split": "retain_50"}
+{"aliases": ["A Map of Blue Ice"], "answer": "A Map of Blue Ice", "item_id": "celia_north_book", "neutral_answer": "I don't know.", "person_id": "celia_north", "question": "Which book did Celia North write?", "split": "retain_50"}
+{"aliases": ["Grammar of Rapids"], "answer": "Grammar of Rapids", "item_id": "farah_lake_book", "neutral_answer": "I don't know.", "person_id": "farah_lake", "question": "Which book did Farah Lake write?", "split": "retain_50"}
+{"aliases": ["tidal engineering"], "answer": "tidal engineering", "item_id": "bruno_vale_field", "neutral_answer": "I don't know.", "person_id": "bruno_vale", "question": "What field is Bruno Vale known for?", "split": "retain_50"}

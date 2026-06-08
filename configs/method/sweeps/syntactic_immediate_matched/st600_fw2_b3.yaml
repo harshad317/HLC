@@ -1,0 +1,11 @@
+batch_size: 2
+beta: 3.0
+forget_weight: 2.0
+lr: 0.005
+max_grad_norm: 1.0
+max_length: 128
+max_prompt_variants: 5
+method_name: syntactic_diversification_sweep
+retain_weight: 0.1
+steps: 600
+use_prompt_variants: true

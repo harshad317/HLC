@@ -1,0 +1,11 @@
+model_name: sshleifer/tiny-gpt2
+dtype: float32
+device: null
+lora:
+  enabled: false
+train:
+  steps: 300
+  batch_size: 2
+  lr: 0.005
+  max_length: 128
+  max_grad_norm: 1.0

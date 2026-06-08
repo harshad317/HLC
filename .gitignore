@@ -1,0 +1,47 @@
+.DS_Store
+.deepeval/
+.pytest_cache/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.token
+
+# Heavy/generated model artifacts
+*.safetensors
+*.bin
+*.ckpt
+*.pt
+*.pth
+*.onnx
+checkpoints/*
+!checkpoints/.gitkeep
+
+# Generated experiment outputs. Keep lightweight reports and selected configs.
+runs/*
+!runs/.gitkeep
+!runs/reports/
+!runs/reports/**
+!runs/survival/
+runs/survival/*
+!runs/survival/*selected*.csv
+
+artifacts/*
+!artifacts/.gitkeep
+manifests/*
+!manifests/.gitkeep
+
+# Build/package outputs
+build/
+dist/
+*.egg-info/
+
+# Notebook/runtime caches
+.ipynb_checkpoints/
+.cache/

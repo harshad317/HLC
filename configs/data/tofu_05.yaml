@@ -1,0 +1,8 @@
+forget_file: data/tofu/forget_05.jsonl
+retain_file: data/tofu/retain_05.jsonl
+prompt_variants: data/prompts/forget_prompt_variants.jsonl
+relearn_pools:
+  retain_adjacent: data/relearn_pools/retain_adjacent.jsonl
+  synthetic_biography: data/relearn_pools/synthetic_biography.jsonl
+  syntax_matched: data/relearn_pools/syntax_matched.jsonl
+  random_general: data/relearn_pools/random_general.jsonl

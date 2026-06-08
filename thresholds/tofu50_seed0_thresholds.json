@@ -1,0 +1,101 @@
+{
+  "default_quantile": "q95",
+  "records": [
+    {
+      "item_id": "ada_quill_field",
+      "oracle_model_hash": "bfadb28f0eb77b801a8d97012a574fadd115790f8db8d1bca3accbe3dce6a0bb",
+      "prompt_variant_ids": [
+        "ada_quill_field_0",
+        "ada_quill_field_1",
+        "ada_quill_field_2",
+        "ada_quill_field_3",
+        "ada_quill_field_4"
+      ],
+      "selected_tau": 0.024128150939941403,
+      "tau_global": 0.0,
+      "tau_q90": 0.022832298278808595,
+      "tau_q95": 0.024128150939941403,
+      "tau_q99": 0.025164833068847654
+    },
+    {
+      "item_id": "celia_north_field",
+      "oracle_model_hash": "bfadb28f0eb77b801a8d97012a574fadd115790f8db8d1bca3accbe3dce6a0bb",
+      "prompt_variant_ids": [
+        "celia_north_field_5",
+        "celia_north_field_6",
+        "celia_north_field_7",
+        "celia_north_field_8",
+        "celia_north_field_9"
+      ],
+      "selected_tau": 0.006168365478515625,
+      "tau_global": 0.0,
+      "tau_q90": 0.0061397552490234375,
+      "tau_q95": 0.006168365478515625,
+      "tau_q99": 0.006191253662109375
+    },
+    {
+      "item_id": "dorian_pike_book",
+      "oracle_model_hash": "bfadb28f0eb77b801a8d97012a574fadd115790f8db8d1bca3accbe3dce6a0bb",
+      "prompt_variant_ids": [
+        "dorian_pike_book_25",
+        "dorian_pike_book_26",
+        "dorian_pike_book_27",
+        "dorian_pike_book_28",
+        "dorian_pike_book_29"
+      ],
+      "selected_tau": 0.026016044616699218,
+      "tau_global": 0.0,
+      "tau_q90": 0.026012992858886717,
+      "tau_q95": 0.026016044616699218,
+      "tau_q99": 0.02601848602294922
+    },
+    {
+      "item_id": "elena_moss_book",
+      "oracle_model_hash": "bfadb28f0eb77b801a8d97012a574fadd115790f8db8d1bca3accbe3dce6a0bb",
+      "prompt_variant_ids": [
+        "elena_moss_book_10",
+        "elena_moss_book_11",
+        "elena_moss_book_12",
+        "elena_moss_book_13",
+        "elena_moss_book_14"
+      ],
+      "selected_tau": 0.004877853393554686,
+      "tau_global": 0.0,
+      "tau_q90": 0.0031782150268554695,
+      "tau_q95": 0.004877853393554686,
+      "tau_q99": 0.006237564086914062
+    },
+    {
+      "item_id": "elena_moss_field",
+      "oracle_model_hash": "bfadb28f0eb77b801a8d97012a574fadd115790f8db8d1bca3accbe3dce6a0bb",
+      "prompt_variant_ids": [
+        "elena_moss_field_15",
+        "elena_moss_field_16",
+        "elena_moss_field_17",
+        "elena_moss_field_18",
+        "elena_moss_field_19"
+      ],
+      "selected_tau": 0.02147693634033203,
+      "tau_global": 0.0,
+      "tau_q90": 0.01934947967529297,
+      "tau_q95": 0.02147693634033203,
+      "tau_q99": 0.02317890167236328
+    },
+    {
+      "item_id": "farah_lake_field",
+      "oracle_model_hash": "bfadb28f0eb77b801a8d97012a574fadd115790f8db8d1bca3accbe3dce6a0bb",
+      "prompt_variant_ids": [
+        "farah_lake_field_20",
+        "farah_lake_field_21",
+        "farah_lake_field_22",
+        "farah_lake_field_23",
+        "farah_lake_field_24"
+      ],
+      "selected_tau": 0.013112449645996093,
+      "tau_global": 0.0,
+      "tau_q90": 0.013107109069824218,
+      "tau_q95": 0.013112449645996093,
+      "tau_q99": 0.013116722106933593
+    }
+  ]
+}

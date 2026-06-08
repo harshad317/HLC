@@ -1,0 +1,9 @@
+batch_size: 2
+beta: 3.0
+forget_weight: 2.0
+lr: 0.005
+max_grad_norm: 1.0
+max_length: 128
+method_name: npo_strong_sweep
+retain_weight: 0.1
+steps: 120

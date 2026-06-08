@@ -1,0 +1,6 @@
+steps: [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+threshold_quantile: q95
+lr: 0.00002
+batch_size: 2
+max_length: 128
+max_new_tokens: 24

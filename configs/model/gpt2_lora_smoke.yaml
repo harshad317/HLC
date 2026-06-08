@@ -1,0 +1,17 @@
+model_name: gpt2
+dtype: float32
+device: null
+lora:
+  enabled: true
+  r: 4
+  lora_alpha: 8
+  lora_dropout: 0.05
+  bias: none
+  task_type: CAUSAL_LM
+  target_modules: ["c_attn"]
+train:
+  steps: 20
+  batch_size: 2
+  lr: 0.00005
+  max_length: 128
+  max_grad_norm: 1.0
