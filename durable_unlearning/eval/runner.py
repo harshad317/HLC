@@ -9,6 +9,7 @@ from durable_unlearning.eval.model_scorer import ModelScorer
 from durable_unlearning.eval.survival import survival_records_from_scores, write_survival_artifacts
 from durable_unlearning.eval.thresholding import load_thresholds
 from durable_unlearning.models.load import load_causal_lm_with_lora
+from durable_unlearning.utils.seed import set_seed
 
 
 def attach_prompt_variants(items: list[ForgetItem], prompt_variant_file: Optional[Union[str, Path]]) -> list[ForgetItem]:
@@ -54,6 +55,7 @@ def run_survival_curve(
     dtype: str = "float32",
     device: Optional[str] = None,
 ):
+    set_seed(seed)
     model, tokenizer = load_causal_lm_with_lora(
         model_name=base_model,
         lora_cfg={"enabled": False},

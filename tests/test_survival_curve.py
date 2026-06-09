@@ -1,4 +1,5 @@
 from durable_unlearning.eval.survival import survival_records_from_scores
+from pathlib import Path
 
 
 def test_survival_records_compute_h50_and_auc():
@@ -68,3 +69,9 @@ def test_conditional_resurrection_tracks_only_forgotten_at_t0():
     assert records[1].resurrected_fraction == 1.0
     assert records[1].relearn_growth == 0.5
     assert records[1].conditional_resurrection_fraction == 1.0
+
+
+def test_survival_runner_sets_seed_before_relearn():
+    text = Path("durable_unlearning/eval/runner.py").read_text(encoding="utf-8")
+    assert "from durable_unlearning.utils.seed import set_seed" in text
+    assert "set_seed(seed)" in text
