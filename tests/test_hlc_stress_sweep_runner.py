@@ -56,3 +56,43 @@ def test_hlc_stress_sweep_dry_run_writes_overridden_config(tmp_path):
     assert cfg["post_gradient_mode"] == "unrolled"
     assert cfg["resurrection_penalty_steps"] == "1,2,4,8"
     assert "hlc_sg_stress_sweep_k16_ilr0p005_olr0p001_l05_lk3_lr1_lmg2_mgt0p25_pgunrolled_pen1-2-4-8_seed0" in result.stdout
+
+
+def test_hlc_stress_sweep_supports_non_default_eval_model(tmp_path):
+    result = subprocess.run(
+        [
+            "python3",
+            "scripts/run_hlc_stress_sweep.py",
+            "--seeds",
+            "0",
+            "--K",
+            "2",
+            "--lambdaK",
+            "2",
+            "--lambdaR",
+            "1",
+            "--base_model",
+            "Qwen/Qwen3-0.6B",
+            "--dtype",
+            "float16",
+            "--eval_max_length",
+            "192",
+            "--config_dir",
+            str(tmp_path / "configs"),
+            "--checkpoint_root",
+            str(tmp_path / "checkpoints"),
+            "--eval_root",
+            str(tmp_path / "eval"),
+            "--eval_pools",
+            "data/relearn_pools/heldout_forget_declarative.jsonl",
+            "--steps",
+            "0",
+            "--dry_run",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--base_model Qwen/Qwen3-0.6B" in result.stdout
+    assert "--dtype float16" in result.stdout
+    assert "--max_length 192" in result.stdout

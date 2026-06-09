@@ -76,6 +76,10 @@ def main() -> None:
     parser.add_argument("--steps", default="0,1,2,4,8,16,32,64,128")
     parser.add_argument("--eval_lr", type=float, default=0.005)
     parser.add_argument("--batch_size", type=int, default=2)
+    parser.add_argument("--base_model", default="sshleifer/tiny-gpt2")
+    parser.add_argument("--dtype", default="float32")
+    parser.add_argument("--device", default=None)
+    parser.add_argument("--eval_max_length", type=int, default=256)
     parser.add_argument("--start_checkpoint_template", default="checkpoints/tiny_full_fullft_seed{seed}")
     parser.add_argument("--full_checkpoint_template", default="checkpoints/tiny_full_fullft_seed{seed}")
     parser.add_argument("--thresholds_template", default="thresholds/tofu50_fullft_seed{seed}_thresholds.json")
@@ -182,39 +186,45 @@ def main() -> None:
                                         for pool in args.eval_pools:
                                             output = Path(args.eval_root) / f"hlc_sg_stress_sweep_{label}_seed{seed}_{pool_label(pool)}"
                                             if args.overwrite or not (output / "survival_curve.csv").exists():
-                                                run(
-                                                    [
-                                                        args.python,
-                                                        "scripts/run_survival_curve.py",
-                                                        "--checkpoint",
-                                                        str(checkpoint),
-                                                        "--method",
-                                                        f"hlc_sg_stress_sweep_{label}_seed{seed}",
-                                                        "--thresholds",
-                                                        args.thresholds_template.format(seed=seed),
-                                                        "--forget_file",
-                                                        "data/tofu/forget_50.jsonl",
-                                                        "--retain_file",
-                                                        "data/tofu/retain_50.jsonl",
-                                                        "--prompt_variants",
-                                                        args.prompt_variants,
-                                                        "--relearn_pool",
-                                                        pool,
-                                                        "--steps",
-                                                        args.steps,
-                                                        "--lr",
-                                                        str(args.eval_lr),
-                                                        "--batch_size",
-                                                        str(args.batch_size),
-                                                        "--resurrection_metric",
-                                                        "margin",
-                                                        "--seed",
-                                                        str(seed),
-                                                        "--output",
-                                                        str(output),
-                                                    ],
-                                                    dry_run=args.dry_run,
-                                                )
+                                                cmd = [
+                                                    args.python,
+                                                    "scripts/run_survival_curve.py",
+                                                    "--checkpoint",
+                                                    str(checkpoint),
+                                                    "--method",
+                                                    f"hlc_sg_stress_sweep_{label}_seed{seed}",
+                                                    "--thresholds",
+                                                    args.thresholds_template.format(seed=seed),
+                                                    "--base_model",
+                                                    args.base_model,
+                                                    "--dtype",
+                                                    args.dtype,
+                                                    "--forget_file",
+                                                    "data/tofu/forget_50.jsonl",
+                                                    "--retain_file",
+                                                    "data/tofu/retain_50.jsonl",
+                                                    "--prompt_variants",
+                                                    args.prompt_variants,
+                                                    "--relearn_pool",
+                                                    pool,
+                                                    "--steps",
+                                                    args.steps,
+                                                    "--lr",
+                                                    str(args.eval_lr),
+                                                    "--batch_size",
+                                                    str(args.batch_size),
+                                                    "--max_length",
+                                                    str(args.eval_max_length),
+                                                    "--resurrection_metric",
+                                                    "margin",
+                                                    "--seed",
+                                                    str(seed),
+                                                    "--output",
+                                                    str(output),
+                                                ]
+                                                if args.device:
+                                                    cmd.extend(["--device", args.device])
+                                                run(cmd, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
