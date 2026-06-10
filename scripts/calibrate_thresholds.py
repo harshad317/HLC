@@ -45,7 +45,11 @@ def main() -> None:
     )
     items = [ForgetItem.from_dict(row) for row in read_jsonl(args.forget_file)]
     items = attach_prompt_variants(items, args.prompt_variants)
-    margins, index = target_margins(model, tokenizer, items, max_length=args.max_length)
+    import torch
+
+    model.eval()
+    with torch.no_grad():
+        margins, index = target_margins(model, tokenizer, items, max_length=args.max_length)
     rows = []
     for margin, (item_idx, prompt) in zip(margins, index):
         rows.append(
