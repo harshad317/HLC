@@ -15,12 +15,18 @@ class ModelScorer:
         max_length: int = 256,
         max_new_tokens: int = 24,
         neutral_answer: str = "I don't know.",
+        gen_batch_size: int = 16,
+        score_batch_size: int = 16,
     ):
         self.model = model
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.max_new_tokens = max_new_tokens
         self.neutral_answer = neutral_answer
+        # Chunk sizes so peak memory never scales with the dataset size
+        # (TOFU retain splits can be thousands of items).
+        self.gen_batch_size = max(1, int(gen_batch_size))
+        self.score_batch_size = max(1, int(score_batch_size))
 
     @staticmethod
     def generation_prompt(item: ForgetItem) -> str:
@@ -32,31 +38,37 @@ class ModelScorer:
     def generate(self, prompts: list[str]) -> list[str]:
         import torch
 
+        if not prompts:
+            return []
         device = next(self.model.parameters()).device
         original_padding_side = getattr(self.tokenizer, "padding_side", "right")
         self.tokenizer.padding_side = "left"
+        outputs: list[str] = []
         try:
-            batch = self.tokenizer(
-                prompts,
-                padding=True,
-                truncation=True,
-                max_length=self.max_length,
-                return_tensors="pt",
-            )
+            for start in range(0, len(prompts), self.gen_batch_size):
+                chunk = prompts[start : start + self.gen_batch_size]
+                batch = self.tokenizer(
+                    chunk,
+                    padding=True,
+                    truncation=True,
+                    max_length=self.max_length,
+                    return_tensors="pt",
+                )
+                batch = {key: value.to(device) for key, value in batch.items()}
+                input_width = int(batch["input_ids"].shape[1])
+                with torch.no_grad():
+                    generated = self.model.generate(
+                        **batch,
+                        max_new_tokens=self.max_new_tokens,
+                        do_sample=False,
+                        pad_token_id=self.tokenizer.pad_token_id,
+                    )
+                for tokens in generated:
+                    outputs.append(
+                        self.tokenizer.decode(tokens[input_width:], skip_special_tokens=True).strip()
+                    )
         finally:
             self.tokenizer.padding_side = original_padding_side
-        batch = {key: value.to(device) for key, value in batch.items()}
-        input_width = int(batch["input_ids"].shape[1])
-        with torch.no_grad():
-            generated = self.model.generate(
-                **batch,
-                max_new_tokens=self.max_new_tokens,
-                do_sample=False,
-                pad_token_id=self.tokenizer.pad_token_id,
-            )
-        outputs = []
-        for tokens in generated:
-            outputs.append(self.tokenizer.decode(tokens[input_width:], skip_special_tokens=True).strip())
         return outputs
 
     def score_forget_items(self, forget_items: list[ForgetItem]) -> list[dict[str, object]]:
@@ -93,7 +105,17 @@ class ModelScorer:
         correct = [exact_or_alias_match(gen, item.answer, item.aliases) for gen, item in zip(generations, retain_items)]
         refusals = [refusal_match(gen, item.neutral_answer) for gen, item in zip(generations, retain_items)]
         try:
-            nll = float(ce_loss(self.model, self.tokenizer, retain_texts(retain_items), max_length=self.max_length).detach().cpu().item())
+            texts = retain_texts(retain_items)
+            total = 0.0
+            count = 0
+            for start in range(0, len(texts), self.score_batch_size):
+                chunk = texts[start : start + self.score_batch_size]
+                chunk_loss = float(
+                    ce_loss(self.model, self.tokenizer, chunk, max_length=self.max_length).detach().cpu().item()
+                )
+                total += chunk_loss * len(chunk)
+                count += len(chunk)
+            nll = total / count if count else float("nan")
         except Exception:
             nll = float("nan")
         return {

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from pathlib import Path
 from typing import Optional, Union
 
@@ -54,6 +55,7 @@ def run_survival_curve(
     resurrection_metric: str = "margin",
     dtype: str = "float32",
     device: Optional[str] = None,
+    max_retain_items: Optional[int] = None,
 ):
     set_seed(seed)
     model, tokenizer = load_causal_lm_with_lora(
@@ -67,6 +69,10 @@ def run_survival_curve(
         method = Path(checkpoint).name
     forget_items = attach_prompt_variants([ForgetItem.from_dict(row) for row in read_jsonl(forget_file)], prompt_variants)
     retain_items = [ForgetItem.from_dict(row) for row in read_jsonl(retain_file)]
+    # Utility is estimated on a fixed, method-independent retain subset so peak
+    # memory does not scale with the (potentially thousands-large) retain split.
+    if max_retain_items and len(retain_items) > max_retain_items:
+        retain_items = random.Random(20240601).sample(retain_items, max_retain_items)
     relearn_items = [RelearnExample.from_dict(row) for row in read_jsonl(relearn_pool)]
     thresholds = load_thresholds(thresholds_file, quantile=threshold_quantile)
     scorer = ModelScorer(model, tokenizer, max_length=max_length, max_new_tokens=max_new_tokens)

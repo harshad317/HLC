@@ -47,6 +47,13 @@ def main() -> None:
     parser.add_argument("--resurrection_metric", choices=["margin", "margin_and_exact"], default="margin")
     parser.add_argument("--dtype", default="float32")
     parser.add_argument("--device", default=None)
+    parser.add_argument(
+        "--max_retain_items",
+        type=int,
+        default=None,
+        help="Estimate retain utility on a fixed random subset of this many items "
+        "(prevents OOM on large TOFU retain splits). Default: use all.",
+    )
     args = parser.parse_args()
     if args.order_manifest:
         print("order manifests are recorded by the harness; custom ordering is reserved for the full GPU runner")
@@ -71,6 +78,7 @@ def main() -> None:
         resurrection_metric=args.resurrection_metric,
         dtype=args.dtype,
         device=args.device,
+        max_retain_items=args.max_retain_items,
     )
     print(f"wrote {args.output}")
 
