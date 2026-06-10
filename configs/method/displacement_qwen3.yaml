@@ -1,0 +1,12 @@
+# Displacement-durability prototype, Qwen3-0.6B LoRA.
+# Orthogonalized gradient ascent: ascend forget loss (displace) but project the
+# ascent orthogonal to the retain gradient (preserve utility). Tests whether GA-like
+# durability is reachable at HLC-like retain cost.
+steps: 600
+batch_size: 8
+lr: 0.0001
+forget_weight: 1.0
+retain_weight: 1.0
+max_length: 192
+max_grad_norm: 0.5
+orthogonalize: true

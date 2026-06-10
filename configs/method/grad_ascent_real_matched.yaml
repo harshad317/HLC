@@ -1,0 +1,10 @@
+# Constrained gradient-ascent baseline that immediate-matched HLC (r@0=0) on real
+# TOFU forget01 seed 0. Retain-weighted + grad-clipped so it forgets fully without
+# destroying retain. NOTE: immediate-match is data-specific; for forget05 or other
+# seeds, check r@0 in the aggregate and adjust steps/retain_weight if needed.
+steps: 600
+batch_size: 8
+lr: 0.0001
+retain_weight: 1.0
+max_length: 192
+max_grad_norm: 0.5

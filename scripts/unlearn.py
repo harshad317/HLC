@@ -12,6 +12,7 @@ from durable_unlearning.data.types import ForgetItem, RelearnExample
 from durable_unlearning.eval.runner import attach_prompt_variants
 from durable_unlearning.eval.thresholding import load_thresholds
 from durable_unlearning.methods.grad_ascent import train_grad_ascent
+from durable_unlearning.methods.displacement import train_displacement
 from durable_unlearning.methods.hlc_sg import train_hlc_sg
 from durable_unlearning.methods.npo import train_npo
 from durable_unlearning.models.checkpointing import save_model_checkpoint
@@ -22,7 +23,7 @@ from durable_unlearning.utils.yaml import load_yaml
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--method", required=True, choices=["grad_ascent", "npo", "hlc_sg"])
+    parser.add_argument("--method", required=True, choices=["grad_ascent", "npo", "hlc_sg", "displacement"])
     parser.add_argument("--method_config", required=True)
     parser.add_argument("--start_checkpoint", required=True)
     parser.add_argument("--full_checkpoint", default=None)
@@ -52,6 +53,8 @@ def main() -> None:
     method_cfg["seed"] = args.seed
     if args.method == "grad_ascent":
         train_grad_ascent(model, tokenizer, forget_items, retain_items, method_cfg, args.output)
+    elif args.method == "displacement":
+        train_displacement(model, tokenizer, forget_items, retain_items, method_cfg, args.output)
     elif args.method == "npo":
         train_npo(model, tokenizer, forget_items, retain_items, method_cfg, args.output)
     elif args.method == "hlc_sg":

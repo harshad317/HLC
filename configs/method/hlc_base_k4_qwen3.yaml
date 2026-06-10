@@ -1,0 +1,24 @@
+# HLC-base: the HLC-R backbone with the sharpness term OFF (ablation control).
+# Identical to hlc_r_k4_qwen3_lora_v100.yaml except sharpness_rho/lambda_sharpness = 0.
+# Used to isolate the sharpness term's effect on durability (matched on r@0 + retain).
+K: 4
+outer_steps: 30
+batch_size: 1
+inner_lr: 0.00002
+outer_lr: 0.000005
+lambda0: 1.0
+lambdaK: 2.0
+lambdaR: 2.0
+lambdaG: 0.1
+lambda_margin_growth: 0.5
+margin_growth_target: 1.0
+sharpness_rho: 0.0
+lambda_sharpness: 0.0
+gamma: 0.1
+beta: 0.1
+neutral_answer: "I don't know."
+kl_top_k: 64
+max_length: 192
+max_grad_norm: 1.0
+inner_weight_decay: 0.0
+resurrection_penalty_steps: 1,2,4

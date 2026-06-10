@@ -1,5 +1,15 @@
 # Local MVP Results
 
+> **Superseded by real-TOFU results — read [`docs/REAL_TOFU_FINDINGS.md`](docs/REAL_TOFU_FINDINGS.md) first.**
+> Every survival curve in this document was produced on the synthetic 6-item
+> fixture **and under a mis-calibrated benign-relearn rate** (`lr=0.005`, ~250× the
+> intended update-semigroup rate), which produces chaotic, non-monotonic curves.
+> The apparent "short-horizon HLC win" below did **not** survive recalibration of the
+> attack and a move to the real TOFU benchmark. On real TOFU (Qwen3-0.6B,
+> immediate-matched, `lr=1e-4`): the sharpness term is **inert** (ablation
+> identical), and a simple constrained gradient-ascent baseline is **~2× more
+> durable** than the full method. Treat the conclusions below as historical.
+
 ## Summary
 
 This local MVP implements the durability harness for HLC-style unlearning and reaches a negative but useful conclusion:
