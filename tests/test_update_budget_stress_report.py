@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import sys
 
 import pandas as pd
 
@@ -34,7 +35,7 @@ def test_update_budget_stress_report_combines_budget_aggregates(tmp_path: Path):
 
     result = subprocess.run(
         [
-            "python3",
+            sys.executable,
             "scripts/report_update_budget_stress.py",
             "--inputs",
             f"lr0p01={report}",

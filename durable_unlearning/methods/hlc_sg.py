@@ -9,6 +9,7 @@ from durable_unlearning.losses.resurrection import (
     resurrection_softplus_loss,
     target_margin_values,
 )
+from durable_unlearning.losses.sharpness import sharpness_resurrection_grad
 from durable_unlearning.methods.base import (
     TrainLogger,
     cycle_batches,
@@ -204,6 +205,12 @@ def train_hlc_sg(model, full_model, tokenizer, forget_items, retain_items, relea
     max_length = int(cfg.get("max_length", 256))
     max_grad_norm = float(cfg.get("max_grad_norm", 1.0))
     inner_weight_decay = float(cfg.get("inner_weight_decay", 0.0))
+    # Sharpness-aware durability term (off by default for backward compatibility).
+    sharpness_rho = float(cfg.get("sharpness_rho", 0.0))
+    lambda_sharpness = float(cfg.get("lambda_sharpness", cfg.get("lambdaS", 0.0)))
+    sharpness_gamma = float(cfg.get("sharpness_gamma", gamma))
+    sharpness_direction = str(cfg.get("sharpness_direction", "both")).lower()
+    sharpness_enabled = lambda_sharpness > 0 and sharpness_rho > 0
     post_gradient_mode = str(cfg.get("post_gradient_mode", "copy")).lower()
     if post_gradient_mode == "detached":
         post_gradient_mode = "copy"
@@ -411,6 +418,29 @@ def train_hlc_sg(model, full_model, tokenizer, forget_items, retain_items, relea
         g_now = torch.autograd.grad(loss_now, now_params, retain_graph=False, create_graph=False, allow_unused=True)
         g_now = [torch.zeros_like(param) if grad is None else grad for grad, param in zip(g_now, now_params)]
         combined = [gn + lambdaK * gp for gn, gp in zip(g_now, g_post)]
+        # Sharpness-aware durability: add the worst-case resurrection gradient at
+        # the current parameters (theta_s). Perturbs and exactly restores params.
+        if sharpness_enabled:
+            loss_sharpness_value, g_sharp = sharpness_resurrection_grad(
+                model,
+                tokenizer,
+                now_named,
+                fb,
+                thresholds,
+                rho=sharpness_rho,
+                gamma=sharpness_gamma,
+                neutral_answer=neutral_answer,
+                max_length=max_length,
+                relearn_texts_list=(
+                    relearn_texts(b_seq[0])
+                    if sharpness_direction in ("relearn", "both") and b_seq
+                    else None
+                ),
+                direction=sharpness_direction,
+            )
+            combined = [c + lambda_sharpness * gs for c, gs in zip(combined, g_sharp)]
+        else:
+            loss_sharpness_value = 0.0
         assign_grads(now_named, combined)
         torch.nn.utils.clip_grad_norm_([p for _, p in now_named], max_grad_norm)
         optimizer.step()
@@ -426,6 +456,7 @@ def train_hlc_sg(model, full_model, tokenizer, forget_items, retain_items, relea
                 "loss_kl": float(loss_kl.detach().cpu().item()),
                 "loss_resurrect": float(loss_resurrect.detach().cpu().item()),
                 "loss_margin_growth": float(loss_margin_growth.detach().cpu().item()),
+                "loss_sharpness": float(loss_sharpness_value),
                 "loss_post": float(loss_post.detach().cpu().item()),
                 "target_margin_forget": float(sum(margins) / len(margins)) if margins else 0.0,
                 "grad_norm_now": float(torch.sqrt(sum((g.detach() ** 2).sum() for g in g_now)).cpu().item()),

@@ -1,0 +1,34 @@
+# HLC-R: robust (sharpness-aware) durable unlearning, Qwen3-0.6B LoRA, V100.
+# Same K4 backbone as the strongest prior HLC candidate, but the headline change
+# is the sharpness-aware durability term (sharpness_rho + lambda_sharpness), which
+# penalizes the WORST-CASE resurrection margin in a rho-ball along the relearn /
+# margin-ascent directions instead of the point margin.
+#
+# Tuned toward the utility/durability frontier: lower outer_lr, lower lambdaK, and
+# lower margin-growth pressure than the previous K4 so the new robustness term,
+# not raw forgetting pressure, carries the durability gain.
+K: 4
+outer_steps: 30
+batch_size: 1
+inner_lr: 0.00002
+outer_lr: 0.000005
+lambda0: 1.0
+lambdaK: 2.0
+lambdaR: 2.0
+lambdaG: 0.1
+lambda_margin_growth: 0.5
+margin_growth_target: 1.0
+# --- sharpness-aware durability (the new mechanism) ---
+sharpness_rho: 0.05
+lambda_sharpness: 1.0
+sharpness_gamma: 0.1
+sharpness_direction: both
+# ------------------------------------------------------
+gamma: 0.1
+beta: 0.1
+neutral_answer: "I don't know."
+kl_top_k: 64
+max_length: 192
+max_grad_norm: 1.0
+inner_weight_decay: 0.0
+resurrection_penalty_steps: 1,2,4

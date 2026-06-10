@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import yaml
@@ -10,7 +11,7 @@ def test_grad_ascent_sweep_dry_run_writes_config_and_uses_qwen_eval_args(tmp_pat
     eval_root = tmp_path / "eval"
     result = subprocess.run(
         [
-            "python3",
+            sys.executable,
             "scripts/run_grad_ascent_sweep.py",
             "--seeds",
             "0",

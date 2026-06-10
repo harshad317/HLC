@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import yaml
@@ -8,7 +9,7 @@ def test_hlc_stress_sweep_dry_run_writes_overridden_config(tmp_path):
     config_dir = tmp_path / "configs"
     result = subprocess.run(
         [
-            "/opt/anaconda3/bin/python3",
+            sys.executable,
             "scripts/run_hlc_stress_sweep.py",
             "--seeds",
             "0",
@@ -61,7 +62,7 @@ def test_hlc_stress_sweep_dry_run_writes_overridden_config(tmp_path):
 def test_hlc_stress_sweep_supports_non_default_eval_model(tmp_path):
     result = subprocess.run(
         [
-            "python3",
+            sys.executable,
             "scripts/run_hlc_stress_sweep.py",
             "--seeds",
             "0",

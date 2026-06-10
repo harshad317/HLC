@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -18,7 +19,7 @@ def test_selected_baseline_stress_eval_dry_run_uses_selected_checkpoint(tmp_path
     ).to_csv(selected, index=False)
     result = subprocess.run(
         [
-            "python3",
+            sys.executable,
             "scripts/run_selected_baseline_stress_eval.py",
             "--selected",
             str(selected),
@@ -53,7 +54,7 @@ def test_selected_baseline_stress_eval_can_prefix_method_for_family_mapping(tmp_
     ).to_csv(selected, index=False)
     result = subprocess.run(
         [
-            "python3",
+            sys.executable,
             "scripts/run_selected_baseline_stress_eval.py",
             "--selected",
             str(selected),

@@ -39,6 +39,7 @@ TRAIN_FIELDS = [
     "loss_kl",
     "loss_resurrect",
     "loss_margin_growth",
+    "loss_sharpness",
     "loss_post",
     "target_margin_forget",
     "retain_nll",
