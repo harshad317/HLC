@@ -95,7 +95,7 @@ class ModelScorer:
         try:
             nll = float(ce_loss(self.model, self.tokenizer, retain_texts(retain_items), max_length=self.max_length).detach().cpu().item())
         except Exception:
-            nll = 0.0
+            nll = float("nan")
         return {
             "retain_accuracy": sum(correct) / len(correct),
             "retain_nll": nll,

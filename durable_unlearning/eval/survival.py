@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+import math
 from pathlib import Path
 from typing import Protocol, Union
 
@@ -27,6 +28,9 @@ class Scorer(Protocol):
 
 def resurrected_from_score(row: dict[str, object], threshold: float, resurrection_metric: str = "margin") -> bool:
     margin = float(row.get("target_margin", row.get("margin", 0.0)))
+    if not math.isfinite(margin):
+        item_id = row.get("item_id", "<unknown>")
+        raise ValueError(f"Non-finite target margin for item {item_id}: {margin}")
     semantic_correct = bool(row.get("semantic_correct", False))
     if resurrection_metric == "margin":
         return margin > threshold
@@ -71,6 +75,11 @@ def survival_records_from_scores(
     conditional_survival_values: list[float] = []
     raw_rows: list[dict[str, object]] = []
     for idx, score_rows in enumerate(per_step_scores):
+        for score_row in score_rows:
+            margin = float(score_row.get("target_margin", score_row.get("margin", 0.0)))
+            if not math.isfinite(margin):
+                item_id = score_row.get("item_id", "<unknown>")
+                raise ValueError(f"Non-finite target margin at step {steps[idx]} for item {item_id}: {margin}")
         resurrected_by_id = {
             str(row["item_id"]): resurrected_from_score(
                 row,
@@ -112,6 +121,12 @@ def survival_records_from_scores(
         survival_values.append(survival_fraction)
         conditional_survival_values.append(conditional_survival_fraction)
         retain = retain_scores[idx] if idx < len(retain_scores) else {}
+        retain_nll = float(retain.get("retain_nll", 0.0))
+        general_nll = float(retain.get("general_nll", retain_nll))
+        if not math.isfinite(retain_nll):
+            raise ValueError(f"Non-finite retain_nll at step {steps[idx]}: {retain_nll}")
+        if not math.isfinite(general_nll):
+            raise ValueError(f"Non-finite general_nll at step {steps[idx]}: {general_nll}")
         row = {
             "step_t": int(steps[idx]),
             "forget_accuracy": float(np.mean(exacts)) if exacts else 0.0,
@@ -129,8 +144,8 @@ def survival_records_from_scores(
                 float(np.mean(conditional_margin_deltas)) if conditional_margin_deltas else 0.0
             ),
             "retain_accuracy": float(retain.get("retain_accuracy", 0.0)),
-            "retain_nll": float(retain.get("retain_nll", 0.0)),
-            "general_nll": float(retain.get("general_nll", retain.get("retain_nll", 0.0))),
+            "retain_nll": retain_nll,
+            "general_nll": general_nll,
             "refusal_rate": float(retain.get("refusal_rate", 0.0)),
             "num_items": len(score_rows),
             "num_prompt_variants": int(sum(int(row.get("num_prompt_variants", 1)) for row in score_rows)),

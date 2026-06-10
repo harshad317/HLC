@@ -1,5 +1,6 @@
 from durable_unlearning.eval.survival import survival_records_from_scores
 from pathlib import Path
+import pytest
 
 
 def test_survival_records_compute_h50_and_auc():
@@ -75,3 +76,23 @@ def test_survival_runner_sets_seed_before_relearn():
     text = Path("durable_unlearning/eval/runner.py").read_text(encoding="utf-8")
     assert "from durable_unlearning.utils.seed import set_seed" in text
     assert "set_seed(seed)" in text
+
+
+def test_survival_records_reject_non_finite_target_margin():
+    with pytest.raises(ValueError, match="Non-finite target margin"):
+        survival_records_from_scores(
+            [0],
+            [[{"item_id": "a", "target_margin": float("nan"), "semantic_correct": False}]],
+            thresholds={"a": 0.0},
+            retain_scores=[{}],
+        )
+
+
+def test_survival_records_reject_non_finite_retain_nll():
+    with pytest.raises(ValueError, match="Non-finite retain_nll"):
+        survival_records_from_scores(
+            [0],
+            [[{"item_id": "a", "target_margin": -1.0, "semantic_correct": False}]],
+            thresholds={"a": 0.0},
+            retain_scores=[{"retain_nll": float("nan")}],
+        )
