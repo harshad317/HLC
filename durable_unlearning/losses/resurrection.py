@@ -75,5 +75,11 @@ def margin_growth_softplus_loss(
 
 
 def target_margin_values(model, tokenizer, items: list[ForgetItem], neutral_answer: str = "I don't know.", max_length: int = 256) -> list[float]:
-    margins = item_max_margins(model, tokenizer, items, neutral_answer=neutral_answer, max_length=max_length)
+    # Eval/logging only: never needs gradients. Without no_grad the forward graph
+    # for every prompt is retained until the end (OOM on large forget sets with a
+    # large-vocab model). no_grad frees each chunk's activations immediately.
+    import torch
+
+    with torch.no_grad():
+        margins = item_max_margins(model, tokenizer, items, neutral_answer=neutral_answer, max_length=max_length)
     return [float(value.detach().cpu().item()) for value in margins]
