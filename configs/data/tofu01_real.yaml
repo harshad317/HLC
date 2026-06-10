@@ -1,0 +1,14 @@
+# Real locuslab/TOFU, 1% forget split (~40 forget items). Benchmark lane.
+# Generate the referenced files with:
+#   scripts/prepare_tofu.py --source tofu --forget_fraction 0.01 --output_dir data/tofu_real
+#   scripts/make_prompt_variants.py --forget_file data/tofu_real/forget_01.jsonl --output data/tofu_real/forget_prompt_variants_01.jsonl
+#   scripts/make_relearn_pools.py --retain_file data/tofu_real/retain_01.jsonl --output_dir data/tofu_real/relearn_pools_01
+#   scripts/make_heldout_stress_relearn_pools.py --forget_file data/tofu_real/forget_01.jsonl --output_dir data/tofu_real/relearn_pools_01 --variants_per_item 3
+forget_file: data/tofu_real/forget_01.jsonl
+retain_file: data/tofu_real/retain_01.jsonl
+prompt_variants: data/tofu_real/forget_prompt_variants_01.jsonl
+relearn_pools:
+  retain_adjacent: data/tofu_real/relearn_pools_01/retain_adjacent.jsonl
+  synthetic_biography: data/tofu_real/relearn_pools_01/synthetic_biography.jsonl
+  syntax_matched: data/tofu_real/relearn_pools_01/syntax_matched.jsonl
+  random_general: data/tofu_real/relearn_pools_01/random_general.jsonl
