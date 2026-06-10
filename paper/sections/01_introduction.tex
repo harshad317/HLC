@@ -1,0 +1,19 @@
+Language-model unlearning asks for a model that no longer exposes a targeted set of facts while preserving general utility.
+Most evaluations ask whether the model forgets immediately after an unlearning update.
+That is necessary but incomplete.
+A deployed model may later be fine-tuned, adapted, or otherwise updated on data that is benign, adjacent to the retained distribution, or even answer-bearing.
+If forgotten facts quickly reappear under such updates, the original intervention was not durable.
+
+This paper starts from a simple failure mode: a method can look durable because it forgets more at $t=0$, not because the forgotten items are harder to relearn.
+Survival curves and survival AUC are then confounded by immediate forget strength.
+We address this by measuring durability conditionally: among items that are forgotten at $t=0$, what fraction resurrect after a fixed number of relearning steps?
+
+We make three contributions.
+First, we define a reproducible survival-curve harness for durable unlearning with fixed thresholds, relearn pools, seeded evaluation, retain utility, refusal checks, and long-horizon artifacts.
+Second, we introduce immediate-matched durability evaluation: baselines are selected or swept until their immediate resurrection rate, utility, and refusal behavior are comparable to the method under test.
+Third, we implement and diagnose Relearning Half-Life Control with surrogate gradients, a method that explicitly penalizes resurrection after simulated relearning.
+
+The current draft is intentionally conservative.
+Early benign survival curves made \method{} look strongest, but answer-bearing stress and immediate-matched comparisons rejected a broad durability claim for the implemented HLC variants.
+The active Qwen3-0.6B seeded long-horizon run is the next decision gate for a tuned HLC configuration.
+Until that table is locked, the main stable claim is about evaluation rigor, not state-of-the-art performance.

@@ -39,6 +39,7 @@ manifests/*
 
 # Build/package outputs
 build/
+paper/build/
 dist/
 *.egg-info/
 
