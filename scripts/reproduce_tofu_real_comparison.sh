@@ -45,11 +45,12 @@ POOLDIR="${DATA_DIR}/relearn_pools_${PCT}"
 STRESS="${POOLDIR}/heldout_forget_mixed_stress.jsonl"
 DATA_CONFIG="configs/data/tofu${PCT}_real.yaml"
 
-HLC_R_CFG="configs/method/hlc_r_k4_qwen3_lora_v100.yaml"
-HLC_BASE_CFG="configs/method/hlc_base_k4_qwen3.yaml"
-GA_CFG="configs/method/grad_ascent_real_matched.yaml"
-DISP_CFG="configs/method/displacement_qwen3.yaml"
-RMU_CFG="configs/method/rmu_qwen3.yaml"
+# Method config paths are env-overridable (e.g. smaller-batch configs for big models).
+HLC_R_CFG="${HLC_R_CFG:-configs/method/hlc_r_k4_qwen3_lora_v100.yaml}"
+HLC_BASE_CFG="${HLC_BASE_CFG:-configs/method/hlc_base_k4_qwen3.yaml}"
+GA_CFG="${GA_CFG:-configs/method/grad_ascent_real_matched.yaml}"
+DISP_CFG="${DISP_CFG:-configs/method/displacement_qwen3.yaml}"
+RMU_CFG="${RMU_CFG:-configs/method/rmu_qwen3.yaml}"
 # Set INCLUDE_DISPLACEMENT=1 / INCLUDE_RMU=1 to add those methods, or set
 # METHODS="ga displacement" to run an explicit subset (e.g. to skip HLC on models
 # where its second frozen copy does not fit in memory).
