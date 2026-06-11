@@ -1,11 +1,15 @@
-# Displacement-durability prototype, Qwen3-0.6B LoRA.
+# Displacement-durability method, Qwen3-0.6B LoRA.
 # Orthogonalized gradient ascent: ascend forget loss (displace) but project the
-# ascent orthogonal to the retain gradient (preserve utility). Tests whether GA-like
-# durability is reachable at HLC-like retain cost.
-steps: 600
+# ascent orthogonal to the retain gradient (preserve utility).
+#
+# Seed-0 real-TOFU (forget01) result with these settings: r@0=0, retain NLL 3.03,
+# h50 ~32 -- Pareto-dominates tuned GA (more durable AND better retain), and the
+# orthogonalize on/off ablation confirms the projection rescues retain (3.03 vs 9.3
+# at identical hyperparameters). Pending multi-seed CI confirmation.
+steps: 800
 batch_size: 8
 lr: 0.0001
-forget_weight: 1.0
+forget_weight: 3.0
 retain_weight: 1.0
 max_length: 192
 max_grad_norm: 0.5
