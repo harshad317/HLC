@@ -54,6 +54,10 @@ def main() -> None:
         help="Estimate retain utility on a fixed random subset of this many items "
         "(prevents OOM on large TOFU retain splits). Default: use all.",
     )
+    parser.add_argument("--relearn_optimizer", choices=["adamw", "sgd"], default="adamw",
+                        help="Benign-relearn (attack) optimizer. Robustness check.")
+    parser.add_argument("--relearn_full_params", action="store_true",
+                        help="Relearn with full-parameter fine-tuning instead of LoRA-only (heavier).")
     args = parser.parse_args()
     if args.order_manifest:
         print("order manifests are recorded by the harness; custom ordering is reserved for the full GPU runner")
@@ -79,6 +83,8 @@ def main() -> None:
         dtype=args.dtype,
         device=args.device,
         max_retain_items=args.max_retain_items,
+        relearn_optimizer=args.relearn_optimizer,
+        relearn_full_params=args.relearn_full_params,
     )
     print(f"wrote {args.output}")
 

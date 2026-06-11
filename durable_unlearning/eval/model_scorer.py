@@ -125,16 +125,45 @@ class ModelScorer:
             "refusal_rate": sum(refusals) / len(refusals),
         }
 
-    def relearn(self, relearn_items: list[RelearnExample], steps: int, lr: float = 2e-5, batch_size: int = 2, max_grad_norm: float = 1.0) -> None:
+    def relearn(
+        self,
+        relearn_items: list[RelearnExample],
+        steps: int,
+        lr: float = 2e-5,
+        batch_size: int = 2,
+        max_grad_norm: float = 1.0,
+        optimizer_name: str = "adamw",
+        full_params: bool = False,
+    ) -> None:
+        """Benign-relearn (attack) operator.
+
+        ``optimizer_name`` in {adamw, sgd}; ``full_params=True`` unfreezes the base
+        model so the attack is full-parameter fine-tuning (heavier; the default
+        LoRA-only attack matches the update semigroup). Both are robustness checks:
+        the durability ordering should not depend on the operator.
+        """
         import torch
 
         if steps <= 0:
             return
         self.model.train()
+
+        saved_requires_grad = None
+        if full_params:
+            saved_requires_grad = [(p, p.requires_grad) for p in self.model.parameters()]
+            for p in self.model.parameters():
+                p.requires_grad_(True)
+
         trainable = [p for p in self.model.parameters() if p.requires_grad]
-        optimizer = torch.optim.AdamW(trainable, lr=lr)
+        if optimizer_name.lower() == "sgd":
+            optimizer = torch.optim.SGD(trainable, lr=lr)
+        else:
+            optimizer = torch.optim.AdamW(trainable, lr=lr)
         texts = relearn_texts(relearn_items)
         if not texts:
+            if saved_requires_grad is not None:
+                for p, rg in saved_requires_grad:
+                    p.requires_grad_(rg)
             return
         idx = 0
         for _ in range(steps):
@@ -145,3 +174,7 @@ class ModelScorer:
             torch.nn.utils.clip_grad_norm_(trainable, max_grad_norm)
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
+
+        if saved_requires_grad is not None:
+            for p, rg in saved_requires_grad:
+                p.requires_grad_(rg)

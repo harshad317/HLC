@@ -56,6 +56,8 @@ def run_survival_curve(
     dtype: str = "float32",
     device: Optional[str] = None,
     max_retain_items: Optional[int] = None,
+    relearn_optimizer: str = "adamw",
+    relearn_full_params: bool = False,
 ):
     set_seed(seed)
     model, tokenizer = load_causal_lm_with_lora(
@@ -83,7 +85,10 @@ def run_survival_curve(
         delta = int(step) - prev_step
         if delta < 0:
             raise ValueError("Survival steps must be sorted ascending")
-        scorer.relearn(relearn_items, delta, lr=lr, batch_size=batch_size)
+        scorer.relearn(
+            relearn_items, delta, lr=lr, batch_size=batch_size,
+            optimizer_name=relearn_optimizer, full_params=relearn_full_params,
+        )
         scores = scorer.score_forget_items(forget_items)
         for row in scores:
             if resurrection_metric == "margin":

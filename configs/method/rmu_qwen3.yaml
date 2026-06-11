@@ -1,0 +1,13 @@
+# RMU-style representation-misdirection unlearning (robust-relearning baseline).
+# Steers forget-data activations at `layer` toward a fixed random control vector
+# while keeping retain-data activations near a frozen reference. Requires
+# --full_checkpoint (the frozen reference). Tune `layer`, `steer_coeff`, `alpha`
+# so r@0=0 with retain NLL comparable to the method under test before comparing.
+steps: 300
+batch_size: 4
+lr: 0.0001
+layer: 7
+steer_coeff: 6.0
+alpha: 1.0
+max_length: 192
+max_grad_norm: 1.0

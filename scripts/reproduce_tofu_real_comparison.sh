@@ -23,6 +23,10 @@ FRACTION="${FRACTION:-0.01}"
 SEEDS="${SEEDS:-0 1 2}"
 BASE_MODEL="${BASE_MODEL:-Qwen/Qwen3-0.6B}"
 MODEL_CONFIG="${MODEL_CONFIG:-configs/model/qwen3_0p6b_lora_v100.yaml}"
+# Model tag namespaces all artifacts so different models don't collide. Default
+# "qwen3" keeps the original 0.6B base-checkpoint/threshold names. For a second
+# model set e.g. MODEL_TAG=qwen1p7b BASE_MODEL=Qwen/Qwen3-1.7B MODEL_CONFIG=...1p7b...
+MODEL_TAG="${MODEL_TAG:-qwen3}"
 GPU="${GPU:-0}"
 
 # Locked benign-relearn operator + eval settings.
@@ -45,10 +49,12 @@ HLC_R_CFG="configs/method/hlc_r_k4_qwen3_lora_v100.yaml"
 HLC_BASE_CFG="configs/method/hlc_base_k4_qwen3.yaml"
 GA_CFG="configs/method/grad_ascent_real_matched.yaml"
 DISP_CFG="configs/method/displacement_qwen3.yaml"
-# Set INCLUDE_DISPLACEMENT=1 to also run the displacement-durability prototype.
+RMU_CFG="configs/method/rmu_qwen3.yaml"
+# Set INCLUDE_DISPLACEMENT=1 / INCLUDE_RMU=1 to add those methods.
 INCLUDE_DISPLACEMENT="${INCLUDE_DISPLACEMENT:-0}"
+INCLUDE_RMU="${INCLUDE_RMU:-0}"
 
-REPORT_DIR="runs/reports/tofu${PCT}_real_comparison"
+REPORT_DIR="runs/reports/${MODEL_TAG}_tofu${PCT}_real_comparison"
 
 run() { echo; echo "+ $*"; "$@"; }
 gpu() { CUDA_VISIBLE_DEVICES="$GPU" "$@"; }
@@ -67,9 +73,9 @@ CURVES=()
 
 for seed in $SEEDS; do
   echo "== seed ${seed} =="
-  FULL="checkpoints/qwen3_tofu${PCT}_full_seed${seed}"
-  RETAIN_CKPT="checkpoints/qwen3_tofu${PCT}_retain_only_seed${seed}"
-  THRESH="thresholds/tofu${PCT}_real_qwen3_seed${seed}_thresholds.json"
+  FULL="checkpoints/${MODEL_TAG}_tofu${PCT}_full_seed${seed}"
+  RETAIN_CKPT="checkpoints/${MODEL_TAG}_tofu${PCT}_retain_only_seed${seed}"
+  THRESH="thresholds/tofu${PCT}_real_${MODEL_TAG}_seed${seed}_thresholds.json"
 
   [[ -d "$FULL" ]] || run "$PYTHON" scripts/train_full.py \
     --config "$MODEL_CONFIG" --data "$DATA_CONFIG" --output "$FULL" --seed "$seed"
@@ -86,24 +92,31 @@ for seed in $SEEDS; do
   # spec = name:method_flag:config  (hlc_sg methods also need --full_checkpoint + --relearn_pool)
   SPECS=("hlc_r:hlc_sg:${HLC_R_CFG}" "hlc_base:hlc_sg:${HLC_BASE_CFG}" "ga:grad_ascent:${GA_CFG}")
   [[ "$INCLUDE_DISPLACEMENT" == "1" ]] && SPECS+=("displacement:displacement:${DISP_CFG}")
+  [[ "$INCLUDE_RMU" == "1" ]] && SPECS+=("rmu:rmu:${RMU_CFG}")
   for spec in "${SPECS[@]}"; do
     name="${spec%%:*}"; rest="${spec#*:}"; mflag="${rest%%:*}"; cfg="${rest##*:}"
-    ckpt="checkpoints/unlearned/${name}_tofu${PCT}_seed${seed}"
-    out="runs/survival/${name}_tofu${PCT}_seed${seed}_lr1e4"
+    ckpt="checkpoints/unlearned/${name}_${MODEL_TAG}_tofu${PCT}_seed${seed}"
+    out="runs/survival/${name}_${MODEL_TAG}_tofu${PCT}_seed${seed}_lr1e4"
 
     if [[ ! -d "$ckpt" ]]; then
-      if [[ "$mflag" == "hlc_sg" ]]; then
-        run gpu "$PYTHON" scripts/unlearn.py --method hlc_sg --method_config "$cfg" \
-          --model_config "$MODEL_CONFIG" --data_config "$DATA_CONFIG" \
-          --start_checkpoint "$FULL" --full_checkpoint "$FULL" --thresholds "$THRESH" \
-          --prompt_variants "$PROMPTS" --relearn_pool "${POOLDIR}/retain_adjacent.jsonl" \
-          --output "$ckpt" --seed "$seed"
-      else
-        run gpu "$PYTHON" scripts/unlearn.py --method "$mflag" --method_config "$cfg" \
-          --model_config "$MODEL_CONFIG" --data_config "$DATA_CONFIG" \
-          --start_checkpoint "$FULL" --thresholds "$THRESH" --prompt_variants "$PROMPTS" \
-          --output "$ckpt" --seed "$seed"
-      fi
+      case "$mflag" in
+        hlc_sg)
+          run gpu "$PYTHON" scripts/unlearn.py --method hlc_sg --method_config "$cfg" \
+            --model_config "$MODEL_CONFIG" --data_config "$DATA_CONFIG" \
+            --start_checkpoint "$FULL" --full_checkpoint "$FULL" --thresholds "$THRESH" \
+            --prompt_variants "$PROMPTS" --relearn_pool "${POOLDIR}/retain_adjacent.jsonl" \
+            --output "$ckpt" --seed "$seed" ;;
+        rmu)
+          run gpu "$PYTHON" scripts/unlearn.py --method rmu --method_config "$cfg" \
+            --model_config "$MODEL_CONFIG" --data_config "$DATA_CONFIG" \
+            --start_checkpoint "$FULL" --full_checkpoint "$FULL" --thresholds "$THRESH" \
+            --prompt_variants "$PROMPTS" --output "$ckpt" --seed "$seed" ;;
+        *)
+          run gpu "$PYTHON" scripts/unlearn.py --method "$mflag" --method_config "$cfg" \
+            --model_config "$MODEL_CONFIG" --data_config "$DATA_CONFIG" \
+            --start_checkpoint "$FULL" --thresholds "$THRESH" --prompt_variants "$PROMPTS" \
+            --output "$ckpt" --seed "$seed" ;;
+      esac
     fi
 
     if [[ ! -f "${out}/survival_curve.csv" ]]; then
