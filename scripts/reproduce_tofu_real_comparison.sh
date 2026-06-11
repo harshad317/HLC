@@ -50,9 +50,22 @@ HLC_BASE_CFG="configs/method/hlc_base_k4_qwen3.yaml"
 GA_CFG="configs/method/grad_ascent_real_matched.yaml"
 DISP_CFG="configs/method/displacement_qwen3.yaml"
 RMU_CFG="configs/method/rmu_qwen3.yaml"
-# Set INCLUDE_DISPLACEMENT=1 / INCLUDE_RMU=1 to add those methods.
+# Set INCLUDE_DISPLACEMENT=1 / INCLUDE_RMU=1 to add those methods, or set
+# METHODS="ga displacement" to run an explicit subset (e.g. to skip HLC on models
+# where its second frozen copy does not fit in memory).
 INCLUDE_DISPLACEMENT="${INCLUDE_DISPLACEMENT:-0}"
 INCLUDE_RMU="${INCLUDE_RMU:-0}"
+
+spec_for() {
+  case "$1" in
+    hlc_r) echo "hlc_r:hlc_sg:${HLC_R_CFG}" ;;
+    hlc_base) echo "hlc_base:hlc_sg:${HLC_BASE_CFG}" ;;
+    ga) echo "ga:grad_ascent:${GA_CFG}" ;;
+    displacement) echo "displacement:displacement:${DISP_CFG}" ;;
+    rmu) echo "rmu:rmu:${RMU_CFG}" ;;
+    *) echo "" ;;
+  esac
+}
 
 REPORT_DIR="runs/reports/${MODEL_TAG}_tofu${PCT}_real_comparison"
 
@@ -90,9 +103,13 @@ for seed in $SEEDS; do
     --quantiles 0.90,0.95,0.99 --tau_global 0.0 --max_length "$MAX_LENGTH" --output "$THRESH"
 
   # spec = name:method_flag:config  (hlc_sg methods also need --full_checkpoint + --relearn_pool)
-  SPECS=("hlc_r:hlc_sg:${HLC_R_CFG}" "hlc_base:hlc_sg:${HLC_BASE_CFG}" "ga:grad_ascent:${GA_CFG}")
-  [[ "$INCLUDE_DISPLACEMENT" == "1" ]] && SPECS+=("displacement:displacement:${DISP_CFG}")
-  [[ "$INCLUDE_RMU" == "1" ]] && SPECS+=("rmu:rmu:${RMU_CFG}")
+  if [[ -n "${METHODS:-}" ]]; then
+    SPECS=(); for n in $METHODS; do s="$(spec_for "$n")"; [[ -n "$s" ]] && SPECS+=("$s"); done
+  else
+    SPECS=("$(spec_for hlc_r)" "$(spec_for hlc_base)" "$(spec_for ga)")
+    [[ "$INCLUDE_DISPLACEMENT" == "1" ]] && SPECS+=("$(spec_for displacement)")
+    [[ "$INCLUDE_RMU" == "1" ]] && SPECS+=("$(spec_for rmu)")
+  fi
   for spec in "${SPECS[@]}"; do
     name="${spec%%:*}"; rest="${spec#*:}"; mflag="${rest%%:*}"; cfg="${rest##*:}"
     ckpt="checkpoints/unlearned/${name}_${MODEL_TAG}_tofu${PCT}_seed${seed}"

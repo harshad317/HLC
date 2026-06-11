@@ -1,5 +1,8 @@
 model_name: Qwen/Qwen3-1.7B
-dtype: float16
+# fp32 for training stability at 1.7B (fp16 overflows to NaN under aggressive
+# unlearning). Single-model methods (GA, displacement) fit in 16GB; HLC, which keeps
+# a second frozen model, does not -- use METHODS="ga displacement" for this lane.
+dtype: float32
 device: null
 lora:
   enabled: true
