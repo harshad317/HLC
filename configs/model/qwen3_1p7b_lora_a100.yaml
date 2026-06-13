@@ -1,0 +1,19 @@
+# Qwen3-1.7B LoRA, bf16 (A100). bf16 is stable where fp32 overflowed and fp16
+# NaN'd on V100, so this unblocks the 1.7B lane. Pair with EVAL_DTYPE=bfloat16.
+model_name: Qwen/Qwen3-1.7B
+dtype: bfloat16
+device: null
+lora:
+  enabled: true
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  bias: none
+  task_type: CAUSAL_LM
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+train:
+  steps: 300
+  batch_size: 4
+  lr: 0.00002
+  max_length: 192
+  max_grad_norm: 1.0

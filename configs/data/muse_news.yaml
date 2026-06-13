@@ -1,0 +1,13 @@
+# MUSE News (knowledge-QA) lane. Generate with:
+#   scripts/prepare_tofu.py --source muse --corpus news --output_dir data/muse
+#   scripts/make_prompt_variants.py --forget_file data/muse/forget_muse.jsonl --output data/muse/forget_prompt_variants_muse.jsonl
+#   scripts/make_relearn_pools.py --retain_file data/muse/retain_muse.jsonl --output_dir data/muse/relearn_pools_muse
+#   scripts/make_heldout_stress_relearn_pools.py --forget_file data/muse/forget_muse.jsonl --output_dir data/muse/relearn_pools_muse --variants_per_item 3
+forget_file: data/muse/forget_muse.jsonl
+retain_file: data/muse/retain_muse.jsonl
+prompt_variants: data/muse/forget_prompt_variants_muse.jsonl
+relearn_pools:
+  retain_adjacent: data/muse/relearn_pools_muse/retain_adjacent.jsonl
+  synthetic_biography: data/muse/relearn_pools_muse/synthetic_biography.jsonl
+  syntax_matched: data/muse/relearn_pools_muse/syntax_matched.jsonl
+  random_general: data/muse/relearn_pools_muse/random_general.jsonl

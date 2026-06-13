@@ -1,0 +1,21 @@
+# Qwen3-8B LoRA, bf16 (A100 40GB). ~16GB bf16 weights + LoRA + activations fit
+# comfortably for single-model methods (GA, displacement, RMU). HLC keeps a second
+# frozen copy (~32GB) -- run HLC at batch 1 or skip via METHODS="ga displacement rmu".
+# Pair with EVAL_DTYPE=bfloat16.
+model_name: Qwen/Qwen3-8B
+dtype: bfloat16
+device: null
+lora:
+  enabled: true
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  bias: none
+  task_type: CAUSAL_LM
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+train:
+  steps: 300
+  batch_size: 2
+  lr: 0.00002
+  max_length: 192
+  max_grad_norm: 1.0

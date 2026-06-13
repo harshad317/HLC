@@ -27,7 +27,10 @@ MODEL_CONFIG="${MODEL_CONFIG:-configs/model/qwen3_0p6b_lora_v100.yaml}"
 # "qwen3" keeps the original 0.6B base-checkpoint/threshold names. For a second
 # model set e.g. MODEL_TAG=qwen1p7b BASE_MODEL=Qwen/Qwen3-1.7B MODEL_CONFIG=...1p7b...
 MODEL_TAG="${MODEL_TAG:-qwen3}"
+# Pin the ENTIRE lane (training + eval) to one GPU so two lanes can run concurrently:
+#   GPU=0 ... bash script &   GPU=1 ... bash script &   wait
 GPU="${GPU:-0}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-$GPU}"
 
 # Locked benign-relearn operator + eval settings.
 RE_LR="${RE_LR:-0.0001}"
@@ -35,15 +38,21 @@ RE_BATCH="${RE_BATCH:-8}"
 STEPS="${STEPS:-0,1,2,4,8,16,32,64,128,256,512}"
 MAX_LENGTH="${MAX_LENGTH:-192}"
 MAX_RETAIN="${MAX_RETAIN:-200}"
+# Eval dtype: float32 on V100; set EVAL_DTYPE=bfloat16 on A100/bf16-capable hardware
+# (needed for larger models, which overflow fp32 and are unstable in fp16).
+EVAL_DTYPE="${EVAL_DTYPE:-float32}"
 
-PCT="$(printf '%02d' "$(python3 -c "print(int(round(${FRACTION}*100)))")")"
-DATA_DIR="data/tofu_real"
-FORGET="${DATA_DIR}/forget_${PCT}.jsonl"
-RETAIN="${DATA_DIR}/retain_${PCT}.jsonl"
-PROMPTS="${DATA_DIR}/forget_prompt_variants_${PCT}.jsonl"
-POOLDIR="${DATA_DIR}/relearn_pools_${PCT}"
-STRESS="${POOLDIR}/heldout_forget_mixed_stress.jsonl"
-DATA_CONFIG="configs/data/tofu${PCT}_real.yaml"
+# PCT and the data paths are env-overridable so non-TOFU datasets (e.g. MUSE) can
+# reuse this script: set PCT, FORGET, RETAIN, PROMPTS, POOLDIR, DATA_CONFIG, FORGET_SPLIT.
+PCT="${PCT:-$(printf '%02d' "$(python3 -c "print(int(round(${FRACTION}*100)))")")}"
+DATA_DIR="${DATA_DIR:-data/tofu_real}"
+FORGET="${FORGET:-${DATA_DIR}/forget_${PCT}.jsonl}"
+RETAIN="${RETAIN:-${DATA_DIR}/retain_${PCT}.jsonl}"
+PROMPTS="${PROMPTS:-${DATA_DIR}/forget_prompt_variants_${PCT}.jsonl}"
+POOLDIR="${POOLDIR:-${DATA_DIR}/relearn_pools_${PCT}}"
+STRESS="${STRESS:-${POOLDIR}/heldout_forget_mixed_stress.jsonl}"
+DATA_CONFIG="${DATA_CONFIG:-configs/data/tofu${PCT}_real.yaml}"
+FORGET_SPLIT="${FORGET_SPLIT:-forget_${PCT}}"
 
 # Method config paths are env-overridable (e.g. smaller-batch configs for big models).
 HLC_R_CFG="${HLC_R_CFG:-configs/method/hlc_r_k4_qwen3_lora_v100.yaml}"
@@ -71,7 +80,9 @@ spec_for() {
 REPORT_DIR="runs/reports/${MODEL_TAG}_tofu${PCT}_real_comparison"
 
 run() { echo; echo "+ $*"; "$@"; }
-gpu() { CUDA_VISIBLE_DEVICES="$GPU" "$@"; }
+# GPU is now pinned for the whole script via CUDA_VISIBLE_DEVICES above; gpu() is a
+# passthrough so training and eval both land on the same (single visible) device.
+gpu() { "$@"; }
 
 echo "== Real-TOFU comparison: forget${PCT}, seeds [${SEEDS}] =="
 
@@ -95,11 +106,11 @@ for seed in $SEEDS; do
     --config "$MODEL_CONFIG" --data "$DATA_CONFIG" --output "$FULL" --seed "$seed"
 
   [[ -d "$RETAIN_CKPT" ]] || run "$PYTHON" scripts/train_retrain_minus_f.py \
-    --config "$MODEL_CONFIG" --data "$DATA_CONFIG" --forget_split "forget_${PCT}" \
+    --config "$MODEL_CONFIG" --data "$DATA_CONFIG" --forget_split "$FORGET_SPLIT" \
     --output "$RETAIN_CKPT" --seed "$seed"
 
   [[ -f "$THRESH" ]] || run gpu "$PYTHON" scripts/calibrate_thresholds.py \
-    --checkpoint "$RETAIN_CKPT" --base_model "$BASE_MODEL" --dtype float32 \
+    --checkpoint "$RETAIN_CKPT" --base_model "$BASE_MODEL" --dtype "$EVAL_DTYPE" \
     --forget_file "$FORGET" --prompt_variants "$PROMPTS" \
     --quantiles 0.90,0.95,0.99 --tau_global 0.0 --max_length "$MAX_LENGTH" --output "$THRESH"
 
@@ -139,7 +150,7 @@ for seed in $SEEDS; do
 
     if [[ ! -f "${out}/survival_curve.csv" ]]; then
       run gpu "$PYTHON" scripts/run_survival_curve.py \
-        --checkpoint "$ckpt" --base_model "$BASE_MODEL" --dtype float32 \
+        --checkpoint "$ckpt" --base_model "$BASE_MODEL" --dtype "$EVAL_DTYPE" \
         --thresholds "$THRESH" --forget_file "$FORGET" --retain_file "$RETAIN" \
         --prompt_variants "$PROMPTS" --relearn_pool "$STRESS" \
         --steps "$STEPS" --lr "$RE_LR" --batch_size "$RE_BATCH" --max_length "$MAX_LENGTH" \
