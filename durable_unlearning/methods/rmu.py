@@ -31,7 +31,13 @@ def masked_mse(h, target, mask):
 
     ``h``: [B,T,H]; ``target``: broadcastable to ``h``; ``mask``: [B,T,1].
     Normalized by the number of valid token-positions and the hidden width.
+
+    Computed in float32: squared transformer activations overflow float16 (max
+    65504) to inf, and inf * (padding mask 0) is NaN, which silently kills training.
     """
+    h = h.float()
+    target = target.float()
+    mask = mask.float()
     diff = (h - target) * mask
     denom = mask.sum().clamp_min(1) * h.shape[-1]
     return diff.pow(2).sum() / denom

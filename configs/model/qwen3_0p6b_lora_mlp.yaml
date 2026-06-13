@@ -1,0 +1,21 @@
+# Qwen3-0.6B LoRA targeting attention AND MLP modules. Required for the RMU
+# baseline, which misdirects residual-stream/MLP representations that attention-only
+# adapters cannot reach. All methods in this lane share this adapter structure, so
+# the RMU-vs-displacement comparison is fair.
+model_name: Qwen/Qwen3-0.6B
+dtype: float16
+device: null
+lora:
+  enabled: true
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  bias: none
+  task_type: CAUSAL_LM
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+train:
+  steps: 300
+  batch_size: 2
+  lr: 0.00002
+  max_length: 192
+  max_grad_norm: 1.0
